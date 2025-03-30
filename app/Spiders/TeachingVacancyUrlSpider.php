@@ -101,12 +101,16 @@ class TeachingVacancyUrlSpider extends BasicSpider
                     $fullLink = 'https://teaching-vacancies.service.gov.uk' . $relativeLink;
                     $jobTitle = $node->text();
     
+                    // Extract the slug from the link
                     if (preg_match('/\/jobs\/([a-z0-9-]+)/', $relativeLink, $matches)) {
-                        $jobId = $matches[1];
+                        $externalSlug = $matches[1]; // e.g. "teacher-of-science-xyz"
+    
+                        $jobId = md5($externalSlug); // guaranteed unique, consistent
                         $professionId = DB::table('keywords')->where('id', $keywordId)->value('profession_id');
     
                         $jobs[] = [
                             'job_id' => $jobId,
+                            'external_job_slug' => $externalSlug,
                             'job_link' => $fullLink,
                             'job_title' => trim($jobTitle),
                             'keyword_id' => $keywordId,
@@ -114,7 +118,7 @@ class TeachingVacancyUrlSpider extends BasicSpider
                             'source_id' => $sourceId,
                         ];
     
-                        Log::info('Job Found', compact('jobId', 'fullLink'));
+                        Log::info('Job Found', compact('jobId', 'externalSlug', 'fullLink'));
                     }
                 } catch (\Exception $e) {
                     Log::error('Error parsing a job node: ' . $e->getMessage());
@@ -125,6 +129,7 @@ class TeachingVacancyUrlSpider extends BasicSpider
                 DB::table('teaching_jobs')->updateOrInsert(
                     ['job_id' => $job['job_id']],
                     [
+                        'external_job_slug' => $job['external_job_slug'],
                         'job_link' => $job['job_link'],
                         'job_title' => $job['job_title'],
                         'source_id' => $job['source_id'],
@@ -145,5 +150,5 @@ class TeachingVacancyUrlSpider extends BasicSpider
         }
     
         yield from [];
-    }    
+    }
 }

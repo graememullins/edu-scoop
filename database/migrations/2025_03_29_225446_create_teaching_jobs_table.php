@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('teaching_jobs', function (Blueprint $table) {
             $table->string('job_id')->primary(); // Unique job ID from source site
             $table->string('job_link')->nullable(); // URL of the job posting
+            $table->string('external_job_slug')->nullable(); // Hash of the job link for uniqueness
             $table->unsignedBigInteger('keyword_id')->nullable(); // Foreign key to keywords
             $table->unsignedBigInteger('profession_id')->nullable(); // Foreign key to professions
             $table->unsignedBigInteger('source_id')->nullable(); // Foreign key to sources
