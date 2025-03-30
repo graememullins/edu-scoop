@@ -35,7 +35,7 @@ class TeachingVacancyUrlSpider extends BasicSpider
                 for ($page = 1; $page <= 5; $page++) {
                     $queryParams = http_build_query([
                         'visa_sponsorship_availability' => [''],
-                        'teaching_job_roles' => ['', 'teacher'],
+                        'teaching_job_roles' => [''],
                         'support_job_roles' => [''],
                         'phases' => [''],
                         'subjects' => [''],
@@ -103,10 +103,23 @@ class TeachingVacancyUrlSpider extends BasicSpider
     
                     // Extract the slug from the link
                     if (preg_match('/\/jobs\/([a-z0-9-]+)/', $relativeLink, $matches)) {
-                        $externalSlug = $matches[1]; // e.g. "teacher-of-science-xyz"
-    
-                        $jobId = md5($externalSlug); // guaranteed unique, consistent
+                        $externalSlug = $matches[1];
+                        $jobId = md5($externalSlug);
                         $professionId = DB::table('keywords')->where('id', $keywordId)->value('profession_id');
+    
+                        // Get the address from the parent job container
+                        $addressNode = $node->closest('div.search-results__item')->filter('p.address.govuk-body');
+                        $addressText = $addressNode->count() ? trim($addressNode->text()) : null;
+    
+                        $postedBy = null;
+                        $postCode = null;
+    
+                        if ($addressText) {
+                            $parts = explode(',', $addressText);
+                            $postedBy = trim($parts[0]);
+                            $town = trim($parts[1] ?? '');
+                            $postCode = trim(end($parts));
+                        }
     
                         $jobs[] = [
                             'job_id' => $jobId,
@@ -116,6 +129,9 @@ class TeachingVacancyUrlSpider extends BasicSpider
                             'keyword_id' => $keywordId,
                             'profession_id' => $professionId,
                             'source_id' => $sourceId,
+                            'posted_by' => $postedBy,
+                            'town' => $town,
+                            'post_code' => $postCode,
                         ];
     
                         Log::info('Job Found', compact('jobId', 'externalSlug', 'fullLink'));
@@ -135,6 +151,9 @@ class TeachingVacancyUrlSpider extends BasicSpider
                         'source_id' => $job['source_id'],
                         'keyword_id' => $job['keyword_id'],
                         'profession_id' => $job['profession_id'],
+                        'posted_by' => $job['posted_by'],
+                        'town' => $job['town'],
+                        'post_code' => $job['post_code'],
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]
@@ -150,5 +169,5 @@ class TeachingVacancyUrlSpider extends BasicSpider
         }
     
         yield from [];
-    }
+    }    
 }

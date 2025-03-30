@@ -20,6 +20,10 @@ class TeachingJob extends Model
     protected $fillable = [
         'job_id',
         'job_link',
+        'job_title',
+        'posted_by',
+        'town',
+        'post_code',
     ];
 
     public function profession()

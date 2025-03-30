@@ -35,16 +35,20 @@ return new class extends Migration
             $table->string('contact_name')->nullable(); // Contact person's name
             $table->string('contact_email')->nullable(); // Email for enquiries
             $table->string('contact_phone')->nullable(); // Phone number
-            $table->string('address_line_1')->nullable(); // School address
-            $table->string('address_line_2')->nullable();
+            $table->decimal('latitude', 10, 8)->nullable(); // Latitude for location
+            $table->decimal('longitude', 11, 8)->nullable(); // Longitude for location
             $table->string('town')->nullable();
+            $table->string('region')->nullable(); // Region of the job
             $table->string('post_code')->nullable(); // Postal code
             $table->boolean('is_scraped')->default(false); // Scrape status
+            $table->boolean('keyword_checked')->default(false);
+            $table->boolean('post_code_validated')->default(false);
             $table->timestamps(); // created_at and updated_at
             $table->softDeletes(); // deleted_at
 
             // Foreign key constraints
             $table->foreign('keyword_id')->references('id')->on('keywords')->onDelete('cascade');
+            $table->foreign('profession_id')->references('id')->on('professions')->onDelete('cascade');
             $table->foreign('source_id')->references('id')->on('sources')->onDelete('cascade');
         });
     }
