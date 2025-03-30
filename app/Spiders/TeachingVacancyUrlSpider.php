@@ -110,16 +110,24 @@ class TeachingVacancyUrlSpider extends BasicSpider
                         // Get the address from the parent job container
                         $addressNode = $node->closest('div.search-results__item')->filter('p.address.govuk-body');
                         $addressText = $addressNode->count() ? trim($addressNode->text()) : null;
-
+    
                         $referenceNumber = 'TV-' . strtoupper(substr($jobId, 0, 10));
     
                         $postedBy = null;
+                        $town = null;
                         $postCode = null;
     
                         if ($addressText) {
-                            $parts = explode(',', $addressText);
-                            $postedBy = trim($parts[0]);
-                            $town = trim($parts[1] ?? '');
+                            $parts = array_map('trim', explode(',', $addressText));
+    
+                            $first = $parts[0] ?? null;
+                            $second = $parts[1] ?? null;
+    
+                            $postedBy = Str::startsWith($first, 'More than one location')
+                                ? ($second ?? $first)
+                                : $first;
+    
+                            $town = $second ?? null;
                             $postCode = trim(end($parts));
                         }
     
@@ -173,5 +181,5 @@ class TeachingVacancyUrlSpider extends BasicSpider
         }
     
         yield from [];
-    }    
+    }       
 }
