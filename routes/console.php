@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Artisan;
-use App\Models\NhsEnglandJob;
+use App\Models\TeachingJob;
 use App\Models\Keyword;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Console\Scheduling\Schedule;
@@ -25,12 +25,12 @@ Artisan::command('spider:teaching-vacancy-spider', function () {
     }
 })->describe('Run the NHSEnglandUrlSpider')->cron('0 8-20 * * *');
 
-Artisan::command('spider:nhs-england-pages', function () {
-    $this->info('Running NHSEnglandPageSpider...');
+Artisan::command('spider:teaching-vacancy-pages', function () {
+    $this->info('Running TeachingPageSpider...');
     
     // Use Symfony Process to run the `roach:run` command
     $process = new Symfony\Component\Process\Process([
-        'php', 'artisan', 'roach:run', 'App\\Spiders\\NHSEnglandPageSpider'
+        'php', 'artisan', 'roach:run', 'App\\Spiders\\TeachingVacancyPageSpider'
     ]);
     $process->setTimeout(3600); // Set a timeout if needed
     $process->run();
@@ -41,7 +41,14 @@ Artisan::command('spider:nhs-england-pages', function () {
         $this->error('Error running the spider:');
         $this->error($process->getErrorOutput());
     }
-})->describe('Run the NHSEnglandPageSpider')->cron('15 8-20 * * *');
+})->describe('Run the TeachingPageSpider')->cron('15 8-20 * * *');
+
+Artisan::command('teaching-jobs:reset-unscraped', function () {
+    $updated = TeachingJob::whereNull('posted_date')
+        ->update(['is_scraped' => false]);
+
+    $this->info("Reset $updated teaching jobs where posted_date was null.");
+});
 
 Artisan::command('jobs:validate-keywords', function () {
     $this->info('Validating unprocessed jobs for keyword assignment...');

@@ -21,9 +21,14 @@ class TeachingJob extends Model
         'job_id',
         'job_link',
         'job_title',
+        'reference_number',
         'posted_by',
         'town',
         'post_code',
+        'is_scraped',
+        'posted_date',
+        'closing_date',
+        'start_date',
     ];
 
     public function profession()

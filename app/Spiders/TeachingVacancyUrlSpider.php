@@ -110,6 +110,8 @@ class TeachingVacancyUrlSpider extends BasicSpider
                         // Get the address from the parent job container
                         $addressNode = $node->closest('div.search-results__item')->filter('p.address.govuk-body');
                         $addressText = $addressNode->count() ? trim($addressNode->text()) : null;
+
+                        $referenceNumber = 'TV-' . strtoupper(substr($jobId, 0, 10));
     
                         $postedBy = null;
                         $postCode = null;
@@ -126,6 +128,7 @@ class TeachingVacancyUrlSpider extends BasicSpider
                             'external_job_slug' => $externalSlug,
                             'job_link' => $fullLink,
                             'job_title' => trim($jobTitle),
+                            'reference_number' => $referenceNumber,
                             'keyword_id' => $keywordId,
                             'profession_id' => $professionId,
                             'source_id' => $sourceId,
@@ -148,6 +151,7 @@ class TeachingVacancyUrlSpider extends BasicSpider
                         'external_job_slug' => $job['external_job_slug'],
                         'job_link' => $job['job_link'],
                         'job_title' => $job['job_title'],
+                        'reference_number' => $job['reference_number'],
                         'source_id' => $job['source_id'],
                         'keyword_id' => $job['keyword_id'],
                         'profession_id' => $job['profession_id'],

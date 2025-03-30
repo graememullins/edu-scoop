@@ -21,7 +21,6 @@ return new class extends Migration
             $table->string('job_title')->nullable(); // Title of the job posting
             $table->date('posted_date')->nullable(); // Date the job was posted
             $table->date('closing_date')->nullable(); // Application closing date
-            $table->date('start_date')->nullable(); // Start date of the job
             $table->string('posted_by')->nullable(); // School name
             $table->string('subject')->nullable(); // Subject area
             $table->string('education_phase')->nullable(); // e.g., Primary, Secondary
