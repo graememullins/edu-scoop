@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Filament\Resources\NhsEnglandJobResource\Widgets;
+namespace App\Filament\Resources\TeachingJobResource\Widgets;
 
-use App\Models\NhsEnglandJob;
 use Filament\Widgets\StatsOverviewWidget\Card;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Illuminate\Support\Carbon;
+use App\Models\TeachingJob;
 
 class JobsPostedWidget extends BaseWidget
 {
@@ -13,31 +13,31 @@ class JobsPostedWidget extends BaseWidget
 
     protected function getCards(): array
     {
-        $count_7 = NhsEnglandJob::whereDate('posted_date', '>=', Carbon::now()->subDays(7))->count();
-        $count_30 = NhsEnglandJob::whereDate('posted_date', '>=', Carbon::now()->subDays(30))->count();
-        $count_60 = NhsEnglandJob::whereDate('posted_date', '>=', Carbon::now()->subDays(60))->count();
-        $count_90 = NhsEnglandJob::whereDate('posted_date', '>=', Carbon::now()->subDays(90))->count();
+        $count_7 = TeachingJob::whereDate('posted_date', '>=', Carbon::now()->subDays(7))->count();
+        $count_30 = TeachingJob::whereDate('posted_date', '>=', Carbon::now()->subDays(30))->count();
+        $count_60 = TeachingJob::whereDate('posted_date', '>=', Carbon::now()->subDays(60))->count();
+        $count_90 = TeachingJob::whereDate('posted_date', '>=', Carbon::now()->subDays(90))->count();
     
         $chart_7 = collect(range(6, 0))
-            ->map(fn ($daysAgo) => NhsEnglandJob::whereDate('posted_date', Carbon::now()->subDays($daysAgo))->count())
+            ->map(fn ($daysAgo) => TeachingJob::whereDate('posted_date', Carbon::now()->subDays($daysAgo))->count())
             ->toArray();
     
         $chart_30 = collect(range(29, 0, 5)) // every 5 days
-            ->map(fn ($daysAgo) => NhsEnglandJob::whereBetween('posted_date', [
+            ->map(fn ($daysAgo) => TeachingJob::whereBetween('posted_date', [
                 Carbon::now()->subDays($daysAgo + 5),
                 Carbon::now()->subDays($daysAgo)
             ])->count())
             ->toArray();
     
         $chart_60 = collect(range(55, 0, 10)) // every 10 days
-            ->map(fn ($daysAgo) => NhsEnglandJob::whereBetween('posted_date', [
+            ->map(fn ($daysAgo) => TeachingJob::whereBetween('posted_date', [
                 Carbon::now()->subDays($daysAgo + 10),
                 Carbon::now()->subDays($daysAgo)
             ])->count())
             ->toArray();
     
         $chart_90 = collect(range(75, 0, 15)) // every 15 days
-            ->map(fn ($daysAgo) => NhsEnglandJob::whereBetween('posted_date', [
+            ->map(fn ($daysAgo) => TeachingJob::whereBetween('posted_date', [
                 Carbon::now()->subDays($daysAgo + 15),
                 Carbon::now()->subDays($daysAgo)
             ])->count())

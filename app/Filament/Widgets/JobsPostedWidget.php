@@ -2,7 +2,7 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\NhsEnglandJob;
+use App\Models\TeachingJob;
 use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Card;
@@ -19,7 +19,7 @@ class JobsPostedWidget extends BaseWidget
         $region = $this->filters['region'] ?? null;
         $professionId = $this->filters['profession_id'] ?? null;
     
-        $baseQuery = NhsEnglandJob::query()
+        $baseQuery = TeachingJob::query()
             ->when($region, fn($query) => $query->where('region', $region))
             ->when($professionId, function ($query, $professionId) {
                 $query->whereHas('keyword', fn ($q) =>

@@ -28,7 +28,19 @@ class TeachingJob extends Model
         'is_scraped',
         'posted_date',
         'closing_date',
-        'start_date',
+        'subject',
+        'education_phase',
+        'age_range',
+        'school_size',
+        'school_type',
+        'contract_type',
+        'contact_phone',
+        'contact_email',
+        'keyword_checked',
+        'post_code_validated',
+        'region',
+        'latitude',
+        'longitude',
     ];
 
     public function profession()

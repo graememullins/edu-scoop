@@ -22,7 +22,7 @@ class TeachingVacancyPageSpider extends BasicSpider
     public static function initializeStartUrls(): array
     {
         return TeachingJob::where('is_scraped', false)
-            ->pluck('job_link') // Full URLs now
+            ->pluck('job_link')
             ->filter(fn ($url) => !empty($url))
             ->toArray();
     }
@@ -56,55 +56,111 @@ class TeachingVacancyPageSpider extends BasicSpider
     public function parse(Response $response): Generator
     {
         $crawler = new Crawler($response->getBody());
-
+    
         // Use meta value or fallback to URI
         $jobLink = $response->getRequest()->getMeta('job_link') ?? $response->getRequest()->getUri();
         $jobLink = trim(strtolower($jobLink)); // Normalize
-
-        $startDate = null;
+    
         $closingDate = null;
         $postedDate = null;
-
+    
         try {
-            $crawler->filter('.timeline-component__item')->each(function (Crawler $node) use (&$startDate, &$closingDate, &$postedDate) {
+            // Timeline dates
+            $crawler->filter('.timeline-component__item')->each(function (Crawler $node) use (&$closingDate, &$postedDate) {
                 $label = trim($node->filter('h3')->text());
                 $value = $node->filter('p')->count() ? trim($node->filter('p')->text()) : null;
-
-                switch ($label) {
-                    case 'Closing date':
-                        $closingDate = $value;
-                        break;
-                    case 'Date listed':
-                        $postedDate = $value;
-                        break;
+    
+                if ($label === 'Closing date') {
+                    $closingDate = $value;
+                } elseif ($label === 'Date listed') {
+                    $postedDate = $value;
                 }
             });
-
+    
             $formattedClosingDate = $this->convertDate($closingDate);
             $formattedPostedDate = $this->convertDate($postedDate);
+    
+            // Extract job summary values
+            $summaryData = [];
+            $crawler->filter('.govuk-summary-list__row')->each(function (Crawler $row) use (&$summaryData) {
+                $label = trim($row->filter('dt')->text());
+                $value = trim($row->filter('dd')->text());
+                $summaryData[$label] = $value;
+            });
+    
+            $subject = $summaryData['Subject'] ?? $summaryData['Subjects'] ?? null;
+            $educationPhase = $summaryData['Education phase'] ?? null;
+            $ageRange = $summaryData['Age range'] ?? null;
+            $contractType = $summaryData['Contract type'] ?? null;
+            // Extract and clean school_type
+            $schoolTypeRaw = $summaryData['School type'] ?? null;
+            $schoolType = null;
 
+            if ($schoolTypeRaw) {
+                $schoolType = preg_replace('/,\s*ages.+$/i', '', $schoolTypeRaw);
+            }
+    
+            // Extract just the number from school size
+            $schoolSizeRaw = $summaryData['School size'] ?? null;
+            $schoolSize = null;
+            if ($schoolSizeRaw && preg_match('/\d+/', $schoolSizeRaw, $matches)) {
+                $schoolSize = (int) $matches[0];
+            }
+
+            // Extract contact email and phone number from full page text
+            $bodyText = $crawler->text();
+
+            // Email: grab first valid address
+            $contactEmail = null;
+            if (preg_match_all('/[a-z0-9._%+-]+@[a-z0-9.-]+\.(?:ac\.uk|co\.uk|org\.uk|gov\.uk|sch\.uk|com|net|org|info|co|uk)\b/i', $bodyText, $emailMatches)) {
+                foreach ($emailMatches[0] as $email) {
+                    if (
+                        !str_contains($email, 'sentry.io') &&
+                        !str_contains($email, 'noreply') &&
+                        !str_contains($email, 'donotreply')
+                    ) {
+                        $contactEmail = $email;
+                        break;
+                    }
+                }
+            }
+
+            // Phone: grab first UK-style number (basic match for 10+ digits or patterns with spaces)
+            $contactPhone = null;
+            if (preg_match('/\(?0\d{2,4}\)?[\s.-]?\d{3,4}[\s.-]?\d{3,4}/', $bodyText, $phoneMatches)) {
+                $contactPhone = $phoneMatches[0];
+            }
+    
             Log::debug("Parsed jobLink: $jobLink");
             Log::debug("Closing date: $closingDate, Posted date: $postedDate");
-
+    
             $job = TeachingJob::whereRaw('LOWER(TRIM(job_link)) = ?', [$jobLink])->first();
-
+    
             if (!$job) {
                 Log::warning("No teaching job found with job_link = $jobLink");
             } else {
                 $job->update([
                     'closing_date' => $formattedClosingDate,
                     'posted_date' => $formattedPostedDate,
+                    'subject' => $subject,
+                    'education_phase' => $educationPhase,
+                    'age_range' => $ageRange,
+                    'contract_type' => $contractType,
+                    'school_type' => $schoolType,
+                    'school_size' => $schoolSize,
+                    'contact_email'  => $contactEmail,
+                    'contact_phone'  => $contactPhone,
                     'is_scraped' => true,
                     'updated_at' => now(),
                 ]);
-                Log::info("Updated job: {$job->job_id}");
+                Log::info("✅ Updated job: {$job->job_id}");
             }
         } catch (\Exception $e) {
-            Log::error("Failed to parse job page $jobLink: " . $e->getMessage());
+            Log::error("❌ Failed to parse job page $jobLink: " . $e->getMessage());
         }
-
+    
         yield from [];
-    }
+    }    
 
     private function convertDate($text): ?string
     {

@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\NhsEnglandJobResource\Pages;
+namespace App\Filament\Resources\TeachingJobResource\Pages;
 
-use App\Filament\Resources\NhsEnglandJobResource;
+use App\Filament\Resources\TeachingJobResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
-class EditNhsEnglandJob extends EditRecord
+class EditTeachingJob extends EditRecord
 {
-    protected static string $resource = NhsEnglandJobResource::class;
+    protected static string $resource = TeachingJobResource::class;
 
     protected function getHeaderActions(): array
     {

@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\NhsEnglandJobResource\Pages;
-use App\Filament\Resources\NhsEnglandJobResource\RelationManagers;
-use App\Models\NhsEnglandJob;
+use App\Filament\Resources\TeachingJobResource\Pages;
+use App\Filament\Resources\TeachingJobResource\RelationManagers;
+use App\Models\TeachingJob;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -24,11 +24,9 @@ use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\DatePicker;
 use Carbon\Carbon;
 
-class NhsEnglandJobResource extends Resource
+class TeachingJobResource extends Resource
 {
-    protected static ?string $model = NhsEnglandJob::class;
-    
-    protected static ?string $slug = 'nhs-jobs-in-england';
+    protected static ?string $model = TeachingJob::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-table-cells';
 
@@ -127,7 +125,7 @@ class NhsEnglandJobResource extends Resource
                     ->formatStateUsing(fn ($state) => $state ? \Carbon\Carbon::parse($state)->format('d/m/Y') : null)
                     //->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('trust')
+                Tables\Columns\TextColumn::make('posted_by')
                     ->label('Posted by') // Keep the label as "Trust"
                     //->formatStateUsing(fn ($record) => $record->trust . ' - <strong>' . e($record->town) . '</strong>')
                     ->html() // Enables HTML rendering for the column
@@ -243,19 +241,16 @@ class NhsEnglandJobResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListNhsEnglandJobs::route('/'),
-            'create' => Pages\CreateNhsEnglandJob::route('/create'),
-            //'view' => Pages\ViewNhsEnglandJob::route('/{record}'),
-            //'edit' => Pages\EditNhsEnglandJob::route('/{record}/edit'),
+            'index' => Pages\ListTeachingJobs::route('/'),
+            'create' => Pages\CreateTeachingJob::route('/create'),
+            'view' => Pages\ViewTeachingJob::route('/{record}'),
+            'edit' => Pages\EditTeachingJob::route('/{record}/edit'),
         ];
     }
 
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            //->where('is_scraped', 1)
-            ->with('keyword') // Eager load the `keyword` relationship
-            ->with('profession') // Eager load the `profession` relationship
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
@@ -263,7 +258,6 @@ class NhsEnglandJobResource extends Resource
 
     public static function getPluralLabel(): string
     {
-        return 'NHS Jobs in England';
+        return 'Teaching Jobs';
     }
-
 }

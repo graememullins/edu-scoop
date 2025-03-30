@@ -1,24 +1,23 @@
 <?php
 
-namespace App\Filament\Resources\NhsEnglandJobResource\Pages;
+namespace App\Filament\Resources\TeachingJobResource\Pages;
 
-use App\Filament\Resources\NhsEnglandJobResource;
+use App\Filament\Resources\TeachingJobResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Resources\Components\Tab;
 use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
-use App\Filament\Resources\NhsEnglandJobResource\Widgets\JobsPostedWidget;
+use App\Filament\Resources\TeachingJobResource\Widgets\JobsPostedWidget;
 
-class ListNhsEnglandJobs extends ListRecords
+class ListTeachingJobs extends ListRecords
 {
-    protected static string $resource = NhsEnglandJobResource::class;
+    protected static string $resource = TeachingJobResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
             //Actions\CreateAction::make(),
-            //Actions\ExportAction::make(),
         ];
     }
 

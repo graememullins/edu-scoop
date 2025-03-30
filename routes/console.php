@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Console\Scheduling\Schedule;
 use JustSteveKing\LaravelPostcodes\Facades\Postcode;
 
-Artisan::command('spider:teaching-vacancy-spider', function () {
+Artisan::command('spider:teaching-vacancy-urls', function () {
     $this->info('Running TeachingUrlSpider...');
     
     // Use Symfony Process to run the `roach:run` command
@@ -26,35 +26,54 @@ Artisan::command('spider:teaching-vacancy-spider', function () {
 })->describe('Run the NHSEnglandUrlSpider')->cron('0 8-20 * * *');
 
 Artisan::command('spider:teaching-vacancy-pages', function () {
-    $this->info('Running TeachingPageSpider...');
-    
-    // Use Symfony Process to run the `roach:run` command
-    $process = new Symfony\Component\Process\Process([
-        'php', 'artisan', 'roach:run', 'App\\Spiders\\TeachingVacancyPageSpider'
-    ]);
-    $process->setTimeout(3600); // Set a timeout if needed
-    $process->run();
+    $this->info('📘 Starting TeachingPageSpider with retry logic...');
 
-    if ($process->isSuccessful()) {
-        $this->info('Spider completed successfully.');
+    $maxAttempts = 3;
+    $attempt = 1;
+
+    do {
+        $this->info("Attempt #$attempt: Running the spider...");
+
+        $process = new Symfony\Component\Process\Process([
+            'php', 'artisan', 'roach:run', 'App\\Spiders\\TeachingVacancyPageSpider'
+        ]);
+        $process->setTimeout(3600);
+        $process->run();
+
+        if ($process->isSuccessful()) {
+            $this->info('Spider completed successfully.');
+        } else {
+            $this->error('Error running the spider:');
+            $this->error($process->getErrorOutput());
+            break;
+        }
+
+        // Reset unscraped jobs
+        $resetCount = TeachingJob::whereNull('posted_date')
+            ->update(['is_scraped' => false]);
+
+        $this->info("Reset $resetCount teaching jobs where posted_date was null.");
+
+        $remaining = TeachingJob::whereNull('posted_date')->count();
+        $this->info("Remaining with posted_date NULL: $remaining");
+
+        $attempt++;
+    } while ($remaining > 0 && $attempt <= $maxAttempts);
+
+    if ($remaining === 0) {
+        $this->info('All jobs successfully scraped!');
     } else {
-        $this->error('Error running the spider:');
-        $this->error($process->getErrorOutput());
+        $this->warn("Some jobs still missing posted_date after $maxAttempts attempts.");
     }
-})->describe('Run the TeachingPageSpider')->cron('15 8-20 * * *');
 
-Artisan::command('teaching-jobs:reset-unscraped', function () {
-    $updated = TeachingJob::whereNull('posted_date')
-        ->update(['is_scraped' => false]);
+})->describe('Run the TeachingPageSpider and retry if any posted_date fields are null')->cron('15 8-20 * * *');
 
-    $this->info("Reset $updated teaching jobs where posted_date was null.");
-});
 
 Artisan::command('jobs:validate-keywords', function () {
     $this->info('Validating unprocessed jobs for keyword assignment...');
 
     // Fetch only jobs where `is_scraped = 1` and `keyword_checked = 0`
-    $jobs = NhsEnglandJob::where('is_scraped', 1)
+    $jobs = TeachingJob::where('is_scraped', 1)
         ->where('keyword_checked', 0)
         ->get();
 
@@ -92,12 +111,12 @@ Artisan::command('jobs:validate-keywords', function () {
     }
 
     $this->info("{$fixed} keywords corrected, {$unchanged} were already correct.");
-})->describe('Cross-check and correct assigned keywords for NHS England jobs')->everyFifteenMinutes();
+})->describe('Cross-check and correct assigned keywords for jobs')->everyFifteenMinutes();
 
 Artisan::command('jobs:validate-postcodes', function () {
-    $this->info('Validating postcodes for NHS England jobs...');
+    $this->info('Validating postcodes for jobs...');
 
-    $jobs = NhsEnglandJob::where('post_code_validated', false)
+    $jobs = TeachingJob::where('post_code_validated', false)
         ->whereNotNull('post_code')
         ->get();
 
@@ -113,14 +132,15 @@ Artisan::command('jobs:validate-postcodes', function () {
                     'region' => $response->region ?? null,
                     'longitude' => $response->longitude ?? null,
                     'latitude' => $response->latitude ?? null,
-                    'ccg' => $response->ccg ?? null,
+                    'nuts' => $response->nuts ?? null,
+                    'pfa' => $response->pfa ?? null,
                     'post_code_validated' => true,
                 ]);
 
-                Log::info("✅ Updated job ID {$job->id} with postcode: {$response->postcode}");
+                Log::info("Updated job ID {$job->id} with postcode: {$response->postcode}");
                 $updated++;
             } else {
-                Log::warning("⚠️ No data found for postcode '{$job->post_code}' (Job ID {$job->id})");
+                Log::warning("No data found for postcode '{$job->post_code}' (Job ID {$job->id})");
                 $failed++;
             }
         } catch (\Throwable $e) {
@@ -130,25 +150,4 @@ Artisan::command('jobs:validate-postcodes', function () {
     }
 
     $this->info("Postcode update complete: {$updated} updated, {$failed} failed.");
-})->describe('Update NHS England jobs with region, coordinates, and CCG from postcode data')->everyThirtyMinutes();
-
-Artisan::command('jobs:backfill-profession', function () {
-    $this->info('Backfilling profession_id on NHS jobs...');
-
-    $count = 0;
-
-    \App\Models\NhsEnglandJob::with('keyword') // eager-load keyword
-        ->whereNotNull('keyword_id')
-        ->chunk(500, function ($jobs) use (&$count) {
-            foreach ($jobs as $job) {
-                if ($job->keyword && $job->profession_id !== $job->keyword->profession_id) {
-                    $job->profession_id = $job->keyword->profession_id;
-                    $job->save();
-
-                    $count++;
-                }
-            }
-        });
-
-    $this->info("Updated {$count} jobs with correct profession_id.");
-})->describe('One-off command to populate profession_id based on keyword_id');
+})->describe('Update jobs with region post code data')->everyThirtyMinutes();

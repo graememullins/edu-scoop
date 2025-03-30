@@ -2,13 +2,13 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\NhsEnglandJob;
+use App\Models\TeachingJob;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\DB;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 
-class HealthScoopKpis extends StatsOverviewWidget
+class ScoopKpis extends StatsOverviewWidget
 {
     use InteractsWithPageFilters;
 
@@ -20,7 +20,7 @@ class HealthScoopKpis extends StatsOverviewWidget
         $region = $this->filters['region'] ?? null;
         $professionId = $this->filters['profession_id'] ?? null;
 
-        $baseQuery = NhsEnglandJob::query()
+        $baseQuery = TeachingJob::query()
             ->when($region, fn ($query) => $query->where('region', $region))
             ->when($professionId, fn ($query) =>
                 $query->whereHas('keyword', fn ($q) =>
@@ -31,7 +31,7 @@ class HealthScoopKpis extends StatsOverviewWidget
         // Top professions
         $topProfessions = (clone $baseQuery)
             ->select('professions.name', DB::raw('COUNT(*) as total'))
-            ->join('keywords', 'nhs_england_jobs.keyword_id', '=', 'keywords.id')
+            ->join('keywords', 'teaching_jobs.keyword_id', '=', 'keywords.id')
             ->join('professions', 'keywords.profession_id', '=', 'professions.id')
             ->groupBy('professions.name')
             ->orderByDesc('total')
@@ -52,11 +52,11 @@ class HealthScoopKpis extends StatsOverviewWidget
             ? round((($thisWeek - $lastWeek) / $lastWeek) * 100, 1)
             : 0;
 
-        // Most active trust
-        $topTrust = (clone $baseQuery)
-            ->select('trust', DB::raw('COUNT(*) as total'))
-            ->whereNotNull('trust')
-            ->groupBy('trust')
+        // Most active poster
+        $topPoster = (clone $baseQuery)
+            ->select('posted_by', DB::raw('COUNT(*) as total'))
+            ->whereNotNull('posted_by')
+            ->groupBy('posted_by')
             ->orderByDesc('total')
             ->first();
 
@@ -78,8 +78,8 @@ class HealthScoopKpis extends StatsOverviewWidget
                 ->description('vs last week')
                 ->color($change >= 0 ? 'success' : 'danger'),
 
-            Stat::make('Top Posters', $topTrust?->trust ?? 'N/A')
-                ->description($topTrust ? $topTrust->total . ' jobs' : ''),
+            Stat::make('Top Posters', $topPoster?->posted_by ?? 'N/A')
+                ->description($topPoster ? $topPoster->total . ' jobs' : ''),
 
             Stat::make('Top Roles', implode(', ', $topTitles))
                 ->description('Most in-demand job titles'),

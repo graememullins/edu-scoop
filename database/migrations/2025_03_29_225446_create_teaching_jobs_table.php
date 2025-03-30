@@ -38,6 +38,9 @@ return new class extends Migration
             $table->decimal('longitude', 11, 8)->nullable(); // Longitude for location
             $table->string('town')->nullable();
             $table->string('region')->nullable(); // Region of the job
+            $table->string('country')->nullable(); // Default to UK
+            $table->string('nuts')->nullable(); // Nomenclature of Territorial Units for Statistics
+            $table->string('pfa')->nullable(); // Public Funding Agency
             $table->string('post_code')->nullable(); // Postal code
             $table->boolean('is_scraped')->default(false); // Scrape status
             $table->boolean('keyword_checked')->default(false);
