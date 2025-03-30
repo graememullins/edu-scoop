@@ -7,12 +7,12 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Console\Scheduling\Schedule;
 use JustSteveKing\LaravelPostcodes\Facades\Postcode;
 
-Artisan::command('spider:nhs-england-urls', function () {
-    $this->info('Running NHSEnglandUrlSpider...');
+Artisan::command('spider:teaching-vacancy-spider', function () {
+    $this->info('Running TeachingUrlSpider...');
     
     // Use Symfony Process to run the `roach:run` command
     $process = new Symfony\Component\Process\Process([
-        'php', 'artisan', 'roach:run', 'App\\Spiders\\NHSEnglandUrlSpider'
+        'php', 'artisan', 'roach:run', 'App\\Spiders\\TeachingVacancyUrlSpider'
     ]);
     $process->setTimeout(3600); // Set a timeout if needed
     $process->run();
