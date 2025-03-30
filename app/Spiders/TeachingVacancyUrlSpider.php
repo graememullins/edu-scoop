@@ -32,7 +32,7 @@ class TeachingVacancyUrlSpider extends BasicSpider
 
         foreach ($sources as $source) {
             foreach ($keywords as $keyword) {
-                for ($page = 1; $page <= 5; $page++) {
+                for ($page = 1; $page <= 20; $page++) {
                     $queryParams = http_build_query([
                         'visa_sponsorship_availability' => [''],
                         'teaching_job_roles' => [''],
