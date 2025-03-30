@@ -26,7 +26,7 @@ Artisan::command('spider:teaching-vacancy-urls', function () {
 })->describe('Run the NHSEnglandUrlSpider')->cron('0 8-20 * * *');
 
 Artisan::command('spider:teaching-vacancy-pages', function () {
-    $this->info('📘 Starting TeachingPageSpider with retry logic...');
+    $this->info('Starting TeachingPageSpider with retry logic...');
 
     $maxAttempts = 3;
     $attempt = 1;
