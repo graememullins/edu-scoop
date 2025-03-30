@@ -231,9 +231,9 @@ class TeachingJobResource extends Resource
     {
         return [
             'index' => Pages\ListTeachingJobs::route('/'),
-            'create' => Pages\CreateTeachingJob::route('/create'),
-            'view' => Pages\ViewTeachingJob::route('/{record}'),
-            'edit' => Pages\EditTeachingJob::route('/{record}/edit'),
+            //'create' => Pages\CreateTeachingJob::route('/create'),
+            //'view' => Pages\ViewTeachingJob::route('/{record}'),
+            //'edit' => Pages\EditTeachingJob::route('/{record}/edit'),
         ];
     }
 
