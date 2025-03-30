@@ -49,7 +49,7 @@ class TeachingJobResource extends Resource
                     ->maxLength(255),
                 Forms\Components\TextInput::make('reference_number')
                     ->maxLength(255),
-                Forms\Components\TextInput::make('band')
+                Forms\Components\TextInput::make('job_link')
                     ->maxLength(255),
                 Forms\Components\TextInput::make('contact_job_title')
                     ->maxLength(255),
