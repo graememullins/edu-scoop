@@ -78,6 +78,8 @@ class TeachingJobResource extends Resource
                     ->maxLength(255),
                 Forms\Components\Checkbox::make('post_code_validated')
                     ->label('Postcode Validated'),
+                Forms\Components\Checkbox::make('is_scraped')
+                    ->label('Unick to scrape again'),
             ]);
     }
 
