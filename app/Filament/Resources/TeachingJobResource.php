@@ -45,7 +45,7 @@ class TeachingJobResource extends Resource
                 Forms\Components\DatePicker::make('closing_date'),
                 Forms\Components\DatePicker::make('created_at')
                     ->label ('Scraped Date'),
-                Forms\Components\TextInput::make('trust')
+                Forms\Components\TextInput::make('posted_by')
                     ->maxLength(255),
                 Forms\Components\TextInput::make('reference_number')
                     ->maxLength(255),
@@ -64,17 +64,11 @@ class TeachingJobResource extends Resource
                     ->visible(fn () => ! auth()->user()?->hasRole('trial'))
                     ->tel()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('address_line_1')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('address_line_2')
-                    ->maxLength(255),
                 Forms\Components\TextInput::make('town')
                     ->maxLength(255),
                 Forms\Components\TextInput::make('region')
                     ->maxLength(255),
                 Forms\Components\TextInput::make('post_code')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('ccg')
                     ->maxLength(255),
                 Forms\Components\TextInput::make('longitude')
                     ->readonly()
@@ -138,7 +132,6 @@ class TeachingJobResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('region')
                     ->label('Region')
-                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('post_code')
@@ -164,9 +157,6 @@ class TeachingJobResource extends Resource
                 Tables\Columns\TextColumn::make('contact_phone')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->visible(fn () => ! auth()->user()?->hasRole('trial'))
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('ccg')
-                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
