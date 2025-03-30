@@ -96,10 +96,6 @@ class TeachingJobResource extends Resource
                 ->sortable()
                 ->label('Job Title')
                 ->searchable(),
-                Tables\Columns\TextColumn::make('band')
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->sortable()
-                    ->searchable(),
                 Tables\Columns\TextColumn::make('profession.name') // Add this column
                     ->label('Profession')
                     ->sortable()
