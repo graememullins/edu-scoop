@@ -132,6 +132,7 @@ class TeachingJobResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('region')
                     ->label('Region')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('post_code')
