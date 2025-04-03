@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -15,12 +14,14 @@ class SourceSeeder extends Seeder
         ];
 
         foreach ($sources as $source) {
-            DB::table('sources')->insert([
-                'name' => $source['name'],
-                'base_url' => $source['base_url'],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            DB::table('sources')->updateOrInsert(
+                ['name' => $source['name']],
+                [
+                    'base_url' => $source['base_url'],
+                    'updated_at' => now(),
+                    'created_at' => now(), // optional: only used if new
+                ]
+            );
         }
     }
 }
