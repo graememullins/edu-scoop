@@ -23,4 +23,9 @@ class Profession extends Model
     {
         return $this->hasMany(NhsEnglandJob::class, 'profession_id');
     }
+
+    public function group()
+    {
+        return $this->belongsTo(ProfessionGroup::class, 'profession_group_id');
+    }
 }

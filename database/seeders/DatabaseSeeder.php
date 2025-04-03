@@ -12,6 +12,7 @@ use Database\Seeders\AdminUserSeeder;
 use Database\Seeders\RoleSeeder;
 use Database\Seeders\ClientSeeder;
 use Database\Seeders\TeachingJobSeeder;
+use Database\Seeders\ProfessionGroupSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -22,6 +23,7 @@ class DatabaseSeeder extends Seeder
     {
 
         $this->call(SourceSeeder::class);
+        $this->call(ProfessionGroupSeeder::class);
         $this->call(ProfessionSeeder::class);
         $this->call(KeywordSeeder::class);
         //$this->call(TeachingJobSeeder::class);

@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('professions', function (Blueprint $table) {
+        Schema::create('profession_groups', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
-            $table->string('status')->default('1');
-            $table->foreignId('profession_group_id')->nullable()->constrained()->nullOnDelete();
+            $table->string('name')->unique(); // Nursing, AHP, HSS
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('professions');
+        Schema::dropIfExists('profession_groups');
     }
 };

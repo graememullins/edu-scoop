@@ -37,6 +37,8 @@ return new class extends Migration
             $table->decimal('latitude', 10, 8)->nullable(); // Latitude for location
             $table->decimal('longitude', 11, 8)->nullable(); // Longitude for location
             $table->string('town')->nullable();
+            $table->string('nuts')->nullable();
+            $table->string('pfa')->nullable();
             $table->string('region')->nullable(); // Region of the job
             $table->string('country')->nullable(); // Default to UK
             $table->string('nuts')->nullable(); // Nomenclature of Territorial Units for Statistics

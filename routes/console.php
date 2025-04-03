@@ -134,6 +134,7 @@ Artisan::command('jobs:validate-postcodes', function () {
                     'latitude' => $response->latitude ?? null,
                     'nuts' => $response->nuts ?? null,
                     'pfa' => $response->pfa ?? null,
+                    'country' => $response->country ?? null,
                     'post_code_validated' => true,
                 ]);
 

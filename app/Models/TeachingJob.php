@@ -39,6 +39,9 @@ class TeachingJob extends Model
         'keyword_checked',
         'post_code_validated',
         'region',
+        'country',
+        'nuts',
+        'pfa',
         'latitude',
         'longitude',
     ];

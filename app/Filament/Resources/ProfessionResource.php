@@ -26,7 +26,13 @@ class ProfessionResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
-    
+                Forms\Components\Select::make('profession_group_id')
+                ->relationship('group', 'name')
+                ->required()
+                ->label('Profession Group')
+                ->searchable()
+                ->preload()
+                ->placeholder('Select a profession group'),
                 // Global toggle for all keywords
                 Forms\Components\Toggle::make('toggle_all_keywords')
                     ->label('Toggle All Keywords')
@@ -57,6 +63,10 @@ class ProfessionResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('group.name')
+                    ->label('Profession Group')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('keywords')
                 ->label('Associated Keywords')
                 ->formatStateUsing(function ($record) {
@@ -76,6 +86,7 @@ class ProfessionResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
+                    ->button()
                     ->visible(fn () => auth()->user()?->hasRole('super_admin')),
             ])
             ->bulkActions([
