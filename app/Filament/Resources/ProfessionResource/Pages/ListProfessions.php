@@ -10,6 +10,8 @@ class ListProfessions extends ListRecords
 {
     protected static string $resource = ProfessionResource::class;
 
+    protected int $defaultPaginationPageSize = 25;
+
     protected function getHeaderActions(): array
     {
         return [
