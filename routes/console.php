@@ -184,7 +184,7 @@ Artisan::command('jobs:backfill-websites-from-email', function () {
         ->where(function ($q) {
             $q->whereNull('website')->orWhere('website', '');
         })
-        ->limit(1000) // Optional: limit if you're testing
+        ->limit(3000) // Optional: limit if you're testing
         ->get();
 
     $updated = 0;
