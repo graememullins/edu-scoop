@@ -104,7 +104,7 @@ class TeachingJobResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('keyword.keyword') // Add the keyword column
                 ->label('Keyword Used')
-                ->toggleable(isToggledHiddenByDefault: false)
+                ->toggleable(isToggledHiddenByDefault: true)
                 ->sortable()
                 ->searchable(),
                 Tables\Columns\TextColumn::make('posted_date')
@@ -130,7 +130,7 @@ class TeachingJobResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('region')
                     ->label('Region')
-                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->toggleable(isToggledHiddenByDefault: false)
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('post_code')
@@ -144,6 +144,7 @@ class TeachingJobResource extends Resource
                 Tables\Columns\TextColumn::make('contact_name')
                     ->visible(fn () => ! auth()->user()?->hasRole('trial'))
                     ->label('Contact Name')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('contact_job_title')
                     ->label('Contact Job Title')
