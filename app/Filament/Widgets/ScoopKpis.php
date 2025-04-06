@@ -57,19 +57,6 @@ class ScoopKpis extends StatsOverviewWidget
             ->pluck('profession_groups.name')
             ->toArray();
 
-        // Weekly change
-        $thisWeek = (clone $baseQuery)
-            ->whereBetween('created_at', [now()->startOfWeek(), now()])
-            ->count();
-
-        $lastWeek = (clone $baseQuery)
-            ->whereBetween('created_at', [now()->subWeek()->startOfWeek(), now()->subWeek()->endOfWeek()])
-            ->count();
-
-        $change = $lastWeek > 0
-            ? round((($thisWeek - $lastWeek) / $lastWeek) * 100, 1)
-            : 0;
-
         // Most active poster
         $topPoster = (clone $baseQuery)
             ->select('posted_by', DB::raw('COUNT(*) as total'))
@@ -94,10 +81,6 @@ class ScoopKpis extends StatsOverviewWidget
 
             Stat::make('Top Groups', implode(', ', $topGroups))
                 ->description('Most in-demand profession groups'),
-
-            Stat::make('Weekly Change', ($change >= 0 ? '+' : '') . $change . '%')
-                ->description('vs last week')
-                ->color($change >= 0 ? 'success' : 'danger'),
 
             Stat::make('Top Posters', $topPoster?->posted_by ?? 'N/A')
                 ->description($topPoster ? $topPoster->total . ' jobs' : ''),
