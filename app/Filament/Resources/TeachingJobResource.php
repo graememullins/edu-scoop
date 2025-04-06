@@ -113,6 +113,7 @@ class TeachingJobResource extends Resource
                     //->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('closing_date')
+                    ->toggleable(isToggledHiddenByDefault: true)    
                     ->label('Closing Date')
                     ->formatStateUsing(fn ($state) => $state ? \Carbon\Carbon::parse($state)->format('d/m/Y') : null)
                     //->date()
