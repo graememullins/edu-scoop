@@ -173,5 +173,36 @@ Artisan::command('jobs:rescrape-missing-emails', function () {
         $count++;
     }
 
-    $this->info("✅ Done. {$count} job(s) marked for re-scraping.");
+    $this->info("Done. {$count} job(s) marked for re-scraping.");
 })->describe('Mark up to 200 jobs (missing contact_email) for re-scraping by setting is_scraped = false');
+
+Artisan::command('jobs:backfill-websites-from-email', function () {
+    $this->info('Backfilling website column from contact_email...');
+
+    $jobs = TeachingJob::query()
+        ->whereNotNull('contact_email')
+        ->where(function ($q) {
+            $q->whereNull('website')->orWhere('website', '');
+        })
+        ->limit(1000) // Optional: limit if you're testing
+        ->get();
+
+    $updated = 0;
+
+    foreach ($jobs as $job) {
+        $email = trim($job->contact_email);
+        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $parts = explode('@', $email);
+            if (count($parts) === 2) {
+                $domain = strtolower($parts[1]);
+                $website = 'https://' . $domain;
+
+                $job->update(['website' => $website]);
+                Log::info("Backfilled website for job ID {$job->id} as {$website}");
+                $updated++;
+            }
+        }
+    }
+
+    $this->info("Backfill complete. {$updated} website(s) updated.");
+})->describe('Backfill website field using domain part of contact_email');
