@@ -194,12 +194,19 @@ class TeachingJobResource extends Resource
                     ),
 
                 TernaryFilter::make('has_contact_email')
-                ->label('Has Contact Email')
-                ->queries(
-                    true: fn ($query) => $query->whereNotNull('contact_email')->where('contact_email', '!=', ''),
-                    false: fn ($query) => $query->whereNull('contact_email')->orWhere('contact_email', ''),
-                ),
-            
+                    ->label('Has Contact Email')
+                    ->queries(
+                        true: fn ($query) => $query->whereNotNull('contact_email')->where('contact_email', '!=', ''),
+                        false: fn ($query) => $query->whereNull('contact_email')->orWhere('contact_email', ''),
+                    ),
+
+                TernaryFilter::make('has_website')
+                    ->label('Has Website')
+                    ->queries(
+                        true: fn ($query) => $query->whereNotNull('website')->where('website', '!=', ''),
+                        false: fn ($query) => $query->whereNull('website')->orWhere('website', ''),
+                    ),
+                            
                 // Date Filter for `posted_date`
                 Filter::make('posted_date')
                 ->form([
