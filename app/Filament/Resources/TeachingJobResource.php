@@ -64,6 +64,8 @@ class TeachingJobResource extends Resource
                     ->visible(fn () => ! auth()->user()?->hasRole('trial'))
                     ->tel()
                     ->maxLength(255),
+                Forms\Components\TextInput::make('website')
+                    ->maxLength(255),
                 Forms\Components\TextInput::make('town')
                     ->maxLength(255),
                 Forms\Components\TextInput::make('region')
@@ -159,6 +161,10 @@ class TeachingJobResource extends Resource
                 Tables\Columns\TextColumn::make('contact_phone')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->visible(fn () => ! auth()->user()?->hasRole('trial'))
+                    ->sortable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('website')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')

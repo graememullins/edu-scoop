@@ -84,10 +84,21 @@ class TeachingVacancyPageSpider extends BasicSpider
             $summaryData = [];
             $contactEmail = null;
             $contactPhone = null;
+            $website = null;
 
-            $crawler->filter('.govuk-summary-list__row')->each(function (Crawler $row) use (&$summaryData, &$contactEmail, &$contactPhone) {
+            $crawler->filter('.govuk-summary-list__row')->each(function (Crawler $row) use (&$summaryData, &$contactEmail, &$contactPhone, &$website) {
                 $label = trim($row->filter('dt')->text());
-                $value = trim($row->filter('dd')->text());
+                $valueNode = $row->filter('dd');
+                $value = $valueNode->count() ? trim($valueNode->text()) : null;
+
+                // Check for website href if label is "School website"
+                if ($label === 'School website') {
+                    $linkNode = $valueNode->filter('a');
+                    if ($linkNode->count()) {
+                        $website = rtrim($linkNode->attr('href'), '/');
+                    }
+                }
+
                 $summaryData[$label] = $value;
 
                 if (!$contactEmail && $label === 'Email address' && filter_var($value, FILTER_VALIDATE_EMAIL)) {
@@ -115,7 +126,7 @@ class TeachingVacancyPageSpider extends BasicSpider
                 $schoolSize = (int) $matches[0];
             }
 
-            // Fallback: scan entire page for email if not already found
+            // Fallback: scan entire page for email or phone if not already found
             if (!$contactEmail || !$contactPhone) {
                 $bodyText = $crawler->text();
 
@@ -158,8 +169,9 @@ class TeachingVacancyPageSpider extends BasicSpider
                     'contract_type' => $contractType,
                     'school_type' => $schoolType,
                     'school_size' => $schoolSize,
-                    'contact_email'  => $contactEmail,
-                    'contact_phone'  => $contactPhone,
+                    'contact_email' => $contactEmail,
+                    'contact_phone' => $contactPhone,
+                    'website' => $website,
                     'is_scraped' => true,
                     'updated_at' => now(),
                 ]);

@@ -44,6 +44,7 @@ class TeachingJob extends Model
         'pfa',
         'latitude',
         'longitude',
+        'website',
     ];
 
     public function profession()
