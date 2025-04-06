@@ -18,26 +18,32 @@ class JobsPostedWidget extends BaseWidget
     {
         $region = $this->filters['region'] ?? null;
         $professionId = $this->filters['profession_id'] ?? null;
-    
+        $professionGroupId = $this->filters['profession_group_id'] ?? null;
+
         $baseQuery = TeachingJob::query()
             ->when($region, fn($query) => $query->where('region', $region))
             ->when($professionId, function ($query, $professionId) {
                 $query->whereHas('keyword', fn ($q) =>
                     $q->where('profession_id', $professionId)
                 );
+            })
+            ->when($professionGroupId, function ($query, $groupId) {
+                $query->whereHas('keyword.profession', fn ($q) =>
+                    $q->where('profession_group_id', $groupId)
+                );
             });
-    
+
         $count_7 = (clone $baseQuery)->whereDate('posted_date', '>=', now()->subDays(7))->count();
         $count_30 = (clone $baseQuery)->whereDate('posted_date', '>=', now()->subDays(30))->count();
         $count_60 = (clone $baseQuery)->whereDate('posted_date', '>=', now()->subDays(60))->count();
-    
+
         $chart_7 = collect(range(6, 0))
             ->map(fn ($daysAgo) => (clone $baseQuery)
                 ->whereDate('posted_date', now()->subDays($daysAgo))
                 ->count()
             )
             ->toArray();
-    
+
         $chart_30 = collect(range(29, 0, 5))
             ->map(fn ($daysAgo) => (clone $baseQuery)
                 ->whereBetween('posted_date', [
@@ -47,7 +53,7 @@ class JobsPostedWidget extends BaseWidget
                 ->count()
             )
             ->toArray();
-    
+
         $chart_60 = collect(range(55, 0, 10))
             ->map(fn ($daysAgo) => (clone $baseQuery)
                 ->whereBetween('posted_date', [
@@ -57,27 +63,27 @@ class JobsPostedWidget extends BaseWidget
                 ->count()
             )
             ->toArray();
-    
+
         return [
             Card::make('Jobs Posted (Last 7 Days)', number_format($count_7))
                 ->description('Since ' . now()->subDays(7)->toFormattedDateString())
                 ->color('success')
                 ->icon('heroicon-m-briefcase')
                 ->chart($chart_7),
-    
+
             Card::make('Jobs Posted (Last 30 Days)', number_format($count_30))
                 ->description('Since ' . now()->subDays(30)->toFormattedDateString())
                 ->color('success')
                 ->icon('heroicon-m-briefcase')
                 ->chart($chart_30),
-    
+
             Card::make('Jobs Posted (Last 60 Days)', number_format($count_60))
                 ->description('Since ' . now()->subDays(60)->toFormattedDateString())
                 ->color('success')
                 ->icon('heroicon-m-briefcase')
                 ->chart($chart_60),
         ];
-    }    
+    }
 
     public static function canView(): bool
     {
