@@ -19,12 +19,18 @@ class ScoopKpis extends StatsOverviewWidget
     {
         $region = $this->filters['region'] ?? null;
         $professionId = $this->filters['profession_id'] ?? null;
+        $professionGroupId = $this->filters['profession_group_id'] ?? null;
 
         $baseQuery = TeachingJob::query()
             ->when($region, fn ($query) => $query->where('region', $region))
             ->when($professionId, fn ($query) =>
                 $query->whereHas('keyword', fn ($q) =>
                     $q->where('profession_id', $professionId)
+                )
+            )
+            ->when($professionGroupId, fn ($query) =>
+                $query->whereHas('keyword.profession', fn ($q) =>
+                    $q->where('profession_group_id', $professionGroupId)
                 )
             );
 
@@ -37,6 +43,18 @@ class ScoopKpis extends StatsOverviewWidget
             ->orderByDesc('total')
             ->limit(3)
             ->pluck('professions.name')
+            ->toArray();
+
+        // Top profession groups
+        $topGroups = (clone $baseQuery)
+            ->join('keywords', 'teaching_jobs.keyword_id', '=', 'keywords.id')
+            ->join('professions', 'keywords.profession_id', '=', 'professions.id')
+            ->join('profession_groups', 'professions.profession_group_id', '=', 'profession_groups.id')
+            ->select('profession_groups.name', DB::raw('COUNT(*) as total'))
+            ->groupBy('profession_groups.name')
+            ->orderByDesc('total')
+            ->limit(3)
+            ->pluck('profession_groups.name')
             ->toArray();
 
         // Weekly change
@@ -72,7 +90,10 @@ class ScoopKpis extends StatsOverviewWidget
 
         return [
             Stat::make('Top Professions', implode(', ', $topProfessions))
-            ->description('Most in-demand professions'),
+                ->description('Most in-demand professions'),
+
+            Stat::make('Top Groups', implode(', ', $topGroups))
+                ->description('Most in-demand profession groups'),
 
             Stat::make('Weekly Change', ($change >= 0 ? '+' : '') . $change . '%')
                 ->description('vs last week')
