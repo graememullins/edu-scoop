@@ -186,6 +186,13 @@ class TeachingJobResource extends Resource
                         true: fn ($query) => $query->where('is_scraped', 1),
                         false: fn ($query) => $query->where('is_scraped', 0),
                     ),
+
+                TernaryFilter::make('has_contact_email')
+                ->label('Has Contact Email')
+                ->queries(
+                    true: fn ($query) => $query->whereNotNull('contact_email')->where('contact_email', '!=', ''),
+                    false: fn ($query) => $query->whereNull('contact_email')->orWhere('contact_email', ''),
+                ),
             
                 // Date Filter for `posted_date`
                 Filter::make('posted_date')
