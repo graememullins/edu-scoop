@@ -154,7 +154,7 @@ Artisan::command('jobs:validate-postcodes', function () {
 })->describe('Update jobs with region post code data')->everyThirtyMinutes();
 
 Artisan::command('jobs:rescrape-missing-emails', function () {
-    $this->info('Marking up to 50 teaching jobs for re-scraping (missing contact_email)...');
+    $this->info('Marking up to 100 teaching jobs for re-scraping (missing contact_email)...');
 
     $jobs = \App\Models\TeachingJob::query()
         ->where(function ($query) {
@@ -162,7 +162,7 @@ Artisan::command('jobs:rescrape-missing-emails', function () {
                   ->orWhere('contact_email', '');
         })
         ->where('is_scraped', true)
-        ->limit(50)
+        ->limit(100)
         ->get();
 
     $count = 0;
@@ -174,4 +174,4 @@ Artisan::command('jobs:rescrape-missing-emails', function () {
     }
 
     $this->info("✅ Done. {$count} job(s) marked for re-scraping.");
-})->describe('Mark up to 50 jobs (missing contact_email) for re-scraping by setting is_scraped = false');
+})->describe('Mark up to 100 jobs (missing contact_email) for re-scraping by setting is_scraped = false');
