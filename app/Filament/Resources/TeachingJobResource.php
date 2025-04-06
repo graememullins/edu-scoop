@@ -154,10 +154,12 @@ class TeachingJobResource extends Resource
                 Tables\Columns\TextColumn::make('contact_email')
                     ->label('Contact Email')
                     ->visible(fn () => ! auth()->user()?->hasRole('trial'))
+                    ->sortable()
                     ->copyable(),
                 Tables\Columns\TextColumn::make('contact_phone')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->visible(fn () => ! auth()->user()?->hasRole('trial'))
+                    ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
